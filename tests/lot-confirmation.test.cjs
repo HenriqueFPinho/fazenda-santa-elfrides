@@ -19,7 +19,7 @@ const context = vm.createContext({
   save: () => writes++, updateLots() {}, toast() {}
 });
 vm.runInContext(fs.readFileSync('dist/js/lots.js', 'utf8'), context);
-vm.runInContext('viewLot = () => {}; bindLotAnimalSelection("001");', context);
+vm.runInContext('viewLot = () => {}; updateLots = () => {}; bindLotAnimalSelection("001");', context);
 checkbox.onchange();
 get('#add-lot-animals').onclick();
 assert.equal(writes, 0);
