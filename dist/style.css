@@ -683,3 +683,9 @@ dialog {
 .animal-lot-picker { margin-top: 18px; }
 .animal-lot-picker summary { cursor: pointer; color: #c7e4b4; }
 #delete-lot-error { color: #ffb1b1; }
+
+.lot-add-section { margin-top: 24px; border-top: 1px solid #444; padding-top: 16px; }
+.lot-candidates { max-height: 280px; overflow-y: auto; margin: 16px 0; }
+.lot-candidate { display: flex; align-items: center; gap: 12px; padding: 12px 4px; margin: 0; border-bottom: 1px solid #383838; }
+.lot-candidate small { display: block; color: #b5b5b5; font-size: .8rem; margin-top: 4px; font-weight: normal; }
+.lot-candidate input { flex: 0 0 auto; }
