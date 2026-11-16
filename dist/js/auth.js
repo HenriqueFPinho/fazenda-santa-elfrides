@@ -33,17 +33,30 @@ async function authorize() {
     const closed = () => finish(false);
     d.addEventListener("close", closed);
     $("#security-back").onclick = () => finish(false);
-    $("#security-form").onsubmit = async (e) => {
+    const form = $("#security-form");
+    let verifying = false;
+    form.onsubmit = async (e) => {
       e.preventDefault();
-      if ((await hash($("#security-password").value)) === SECURITY_HASH) {
-        editUnlocked = true;
-        refreshProfileLocks();
-        finish(true);
-        toast("Edição e exclusão liberadas nesta sessão.");
-      } else {
-        $("#security-error").textContent = "Senha incorreta. Tente novamente.";
-        $("#security-password").value = "";
-        $("#security-password").focus();
+      if (verifying || done) return;
+      verifying = true;
+      try {
+        const digest = await hash($("#security-password").value);
+        if (done || !signedIn || $("#security-form") !== form) return;
+        if (digest === SECURITY_HASH) {
+          editUnlocked = true;
+          refreshProfileLocks();
+          finish(true);
+          toast("Edição e exclusão liberadas nesta sessão.");
+        } else {
+          $("#security-error").textContent = "Senha incorreta. Tente novamente.";
+          $("#security-password").value = "";
+          $("#security-password").focus();
+        }
+      } catch {
+        if (!done && $("#security-form") === form)
+          $("#security-error").textContent = "Não foi possível verificar a senha. Tente novamente.";
+      } finally {
+        verifying = false;
       }
     };
     $("#security-password").focus();

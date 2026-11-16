@@ -83,7 +83,12 @@ async function submit(e) {
   const updates = profileEditingActive()
     ? profileUpdates(existing, values, editUnlocked)
     : {};
-  if (hasInfo(updates.lot) && !allLots().some(lot=>lot.id===updates.lot)) return toast("Selecione um lote existente.");
+  if (hasInfo(updates.lot)) {
+    const lot = allLots().find(item => item.id === updates.lot);
+    if (!lot) return toast("Selecione um lote existente.");
+    if (!editUnlocked && !lotAcceptsAnimals(lot))
+      return toast("Este lote já recebeu uma saída. Selecione um lote aberto.");
+  }
   if (
     hasInfo(updates.age) &&
     !validAge(updates.age)

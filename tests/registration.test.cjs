@@ -19,6 +19,12 @@ fields('TESTE','-1');await run('submit({preventDefault(){}})');assert.match(mess
 run("find('TESTE').exit={reason:'Morte',day:'2026-11-07',detail:'Teste'}");fields('TESTE','330');await run('submit({preventDefault(){}})');assert.equal(message,'blocked');
 run('editUnlocked=true');await run('submit({preventDefault(){}})');assert.equal(run("find('TESTE').weights.length"),2);
 run("tab='sessao';db.session=[]");fields('NOVO','250');node('#bathed').checked=true;node('#vaccinated').checked=true;node('#vname').value='Teste';node('#vday').value='2026-11-07';node('#next').value='2026-12-07';await run('submit({preventDefault(){}})');assert.equal(run("find('NOVO').vaccines.length"),1);assert.equal(run("find('NOVO').vaccines[0].day"),'2026-11-07');assert.equal(run("find('NOVO').baths[0].day"),'2026-11-07');assert.equal(run('db.session.length'),1);
+run("tab='individual';editUnlocked=false;db.lots.push({id:'002',actualExitDate:'2026-01-01'})");
+fields('LOTE-FECHADO','');node('#lot').value='002';
+await run('submit({preventDefault(){}})');
+assert.equal(run("find('LOTE-FECHADO')"),undefined);
+assert.match(message,/lote já recebeu uma saída/);
+run("tab='sessao'");
 ctx.confirmRecord=async()=>false;fields('CANCELADO','200');await run('submit({preventDefault(){}})');assert.equal(run("find('CANCELADO')"),undefined);
 console.log('PASS registros: senha, cadastro parcial, idade zero, peso, vacina, sessão, cancelamento, bloqueio, autorização e rollback.');
 })().catch(e=>{console.error(e);process.exitCode=1});

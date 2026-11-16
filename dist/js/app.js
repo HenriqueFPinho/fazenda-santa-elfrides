@@ -1,4 +1,5 @@
 // Inicialização e eventos globais
+let loginAttempt = 0;
 
 $("#settings").onclick = () => {
   modal(
@@ -47,15 +48,23 @@ document.querySelectorAll("[data-tab]").forEach(
 
 $("#login-form").onsubmit = async (e) => {
   e.preventDefault();
+  const attempt = ++loginAttempt;
   if (storageError) {
     $("#login-error").textContent = "Não foi possível ler os dados locais. Os registros originais foram preservados. Baixe uma cópia para recuperação antes de limpar os dados do navegador.";
     if (storedData) download("campo-recuperacao.json", storedData, "application/json");
     return;
   }
-  if (
-    $("#login-user").value.trim() === "admin" &&
-    (await hash($("#login-password").value)) === LOGIN_HASH
-  ) {
+  const user = $("#login-user").value.trim();
+  let digest;
+  try {
+    digest = await hash($("#login-password").value);
+  } catch {
+    if (attempt === loginAttempt)
+      $("#login-error").textContent = "Não foi possível verificar o login. Tente novamente.";
+    return;
+  }
+  if (attempt !== loginAttempt) return;
+  if (user === "admin" && digest === LOGIN_HASH) {
     signedIn = true;
     currentRole = "admin";
     editUnlocked = false;
@@ -77,6 +86,7 @@ $("#login-form").onsubmit = async (e) => {
 };
 
 $("#logout").onclick = () => {
+  loginAttempt++;
   signedIn = false;
   currentRole = null;
   editUnlocked = false;

@@ -2,13 +2,9 @@
 
 Sistema de cadastro e manejo do rebanho em HTML, CSS e JavaScript, sem dependências de execução ou compilação.
 
-## Executar
+## Acessar o site
 
-```sh
-python -m http.server 8000 --directory dist
-```
-
-Abra http://localhost:8000. Em produção, utilize HTTPS.
+[Fazenda Santa Elfrides — abrir o site](https://henriquexon.github.io/fazenda-santa-elfrides/)
 
 ## Estrutura
 
@@ -39,17 +35,3 @@ são isolados: os testes não alteram os registros reais do navegador.
 A validação automatizada não substitui testes em aparelhos reais,
 especialmente impressão/PDF e download/restauração de arquivos.
 
-## Armazenamento e limites
-
-Os registros ficam no localStorage deste navegador, sob a chave `campo-v1`.
-Outro endereço ou aparelho terá armazenamento independente. Para transferir
-registros, baixe e restaure uma cópia em Dados e segurança.
-
-Login local: `admin` / `1234`. Verificação de edição: `220405`.
-Esses controles locais não são autenticação de servidor e não protegem
-os dados contra alguém com acesso ao navegador. Não reutilize essas senhas.
-
-Não há sincronização, backup automático, integração com balança nem funcionamento
-offline garantido. Excel usa CSV; PDF usa a impressão do navegador.
-Dados locais inválidos bloqueiam a entrada e podem ser baixados para recuperação,
-sem serem substituídos por um cadastro vazio.

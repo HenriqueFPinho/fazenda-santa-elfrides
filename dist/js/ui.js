@@ -165,10 +165,6 @@ function render() {
     $("#brinco").value = id;
     const a = find(id);
     $("#brinco").dataset.verified = id;
-    controls.forEach((el) => (el.disabled = false));
-    $("#known").textContent = a
-      ? `Animal cadastrado • Peso anterior: ${last(a)?.kg ?? "—"} kg (${date(last(a)?.day)})`
-      : "Novo cadastro • Complete o peso e a vacinação.";
     for (const k of visibleProfileKeys()) {
       if (["age","breed"].includes(k)) fillProfileSelect(k, a?.[k]);
       else $("#" + k).value = a?.[k] ?? "";

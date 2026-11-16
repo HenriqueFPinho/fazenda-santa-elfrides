@@ -12,12 +12,10 @@ aside {
   width: 260px;
   inset: 0 auto 0 0;
   padding: 38px 24px;
-  border-right: 1px solid #dce3d6;
+  border-right: 1px solid #333;
 }
 .brand {
-  font-size: 40px;
   font-weight: 750;
-  letter-spacing: -2px;
 }
 .brand span {
   display: block;
@@ -33,7 +31,7 @@ nav {
 button {
   cursor: pointer;
   font: inherit;
-  border: 1px solid #d8dfd3;
+  border: 1px solid #454545;
   border-radius: 10px;
   padding: 12px 17px;
   min-height: 46px;
@@ -48,7 +46,6 @@ nav button {
   position: absolute;
   bottom: 35px;
   font-size: 13px;
-  color: #70806e;
   line-height: 1.7;
 }
 main {
@@ -61,7 +58,7 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #dfe5d9;
+  border-bottom: 1px solid #383838;
   font-size: 11px;
   letter-spacing: 1px;
 }
@@ -82,7 +79,6 @@ h1 {
   margin: 8px 0;
 }
 p {
-  color: #748073;
   font-size: 14px;
   line-height: 1.6;
 }
@@ -100,7 +96,7 @@ p {
 }
 .stat,
 .card {
-  border: 1px solid #e1e6dc;
+  border: 1px solid #383838;
   border-radius: 16px;
   padding: 24px;
 }
@@ -110,7 +106,6 @@ p {
   margin-top: 9px;
 }
 .stat span {
-  color: #788371;
   font-size: 12px;
 }
 .grid {
@@ -128,7 +123,6 @@ p {
 }
 .fields {
   display: grid;
-  grid-template-columns: 1fr 1fr;
   gap: 16px;
 }
 label {
@@ -140,11 +134,9 @@ label {
 input,
 select {
   width: 100%;
-  border: 1px solid #d7dfd1;
+  border: 1px solid #505050;
   border-radius: 9px;
   padding: 13px;
-  background: #fafbf7;
-  color: #243d30;
   font: inherit;
   min-width: 0;
 }
@@ -169,7 +161,6 @@ input[type="checkbox"] {
 .empty {
   padding: 45px 12px;
   text-align: center;
-  color: #7c8875;
 }
 .empty i {
   font-size: 45px;
@@ -182,16 +173,14 @@ input[type="checkbox"] {
   justify-content: space-between;
   gap: 12px;
   padding: 15px 0;
-  border-bottom: 1px solid #edf0e7;
+  border-bottom: 1px solid #383838;
   font-size: 14px;
 }
 .muted {
-  color: #7b8774;
   font-size: 12px;
 }
 footer {
   font-size: 11px;
-  color: #85907f;
   margin-top: 35px;
   line-height: 1.9;
 }
@@ -226,19 +215,16 @@ input:focus-visible {
     width: auto;
     padding: 20px 18px;
   }
-  .brand {
-    font-size: 29px;
-  }
   .brand span {
     font-size: 8px;
   }
   nav {
     margin-top: 20px;
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 5px;
   }
   nav button {
-    flex: 1;
     font-size: 11px;
     padding: 9px 6px;
     text-align: center;
@@ -335,12 +321,10 @@ body {
 }
 aside {
   background: #191919;
-  border-color: #333;
 }
 button {
   background: #292929;
   color: #ededed;
-  border-color: #454545;
 }
 nav button {
   color: #cecece;
@@ -348,7 +332,6 @@ nav button {
 .stat,
 .card {
   background: #202020;
-  border-color: #383838;
 }
 input,
 select,
@@ -600,12 +583,6 @@ dialog {
   max-height: 90dvh;
   overflow: auto;
 }
-@media (max-width: 800px) {
-  nav {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-  }
-}
 @media (max-width: 420px) {
   .campo-animal {
     padding: 14px;
@@ -689,3 +666,22 @@ dialog {
 .lot-candidate { display: flex; align-items: center; gap: 12px; padding: 12px 4px; margin: 0; border-bottom: 1px solid #383838; }
 .lot-candidate small { display: block; color: #b5b5b5; font-size: .8rem; margin-top: 4px; font-weight: normal; }
 .lot-candidate input { flex: 0 0 auto; }
+
+/* Imprime o diálogo aberto sem repetir a tela que está atrás dele. */
+@media print {
+  body:has(dialog[open]) > main,
+  #login-screen,
+  #toast,
+  button,
+  .icon-button,
+  .admin-icon,
+  .lot-add-section,
+  .lot-detail-actions {
+    display: none !important;
+  }
+  dialog[open] {
+    max-height: none;
+    overflow: visible;
+    margin: 0;
+  }
+}
