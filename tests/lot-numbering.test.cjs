@@ -1,0 +1,24 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const nodes={};const node=s=>nodes[s]||={value:'',dataset:{},querySelectorAll:()=>[],close(){}};
+const ctx=vm.createContext({localStorage:{getItem:()=>null},document:{querySelector:node}});
+for(const f of ['config','utils','rules','ui','lots'])vm.runInContext(fs.readFileSync(`${__dirname}/../dist/js/${f}.js`,'utf8'),ctx);
+const run=s=>vm.runInContext(s,ctx);
+assert.equal(run('nextLotNumber()'),'001');
+assert.equal(run("nextLotNumber({animals:[],lots:[{id:'032'},{id:'009'}]})"),'033');
+assert.throws(()=>run("nextLotNumber({animals:[],lots:[{id:'999'}]})"));
+run("var old={animals:[{id:'A',lot:'9'},{id:'B',lot:'9'},{id:'C',lot:'Antigo'}],session:[],lots:[{id:'9'},{id:'Antigo'}]};var migrated=normalizeLotNumbers(old)");
+assert.equal(run('migrated.animals[0].lot'),'009');assert.equal(run('migrated.animals[1].lot'),'009');assert.equal(run('migrated.animals[2].lot'),'010');assert.equal(run('old.animals[0].lot'),'9');
+assert.equal(run('JSON.stringify(normalizeLotNumbers(migrated))===JSON.stringify(migrated)'),true);
+run("db={animals:[{id:'ANIMAL',lot:'032'}],session:[],lots:[{id:'032',kind:'Compra',entryDate:'2026-01-01',spent:100,plannedExitDate:'2026-12-01'}]}");
+assert.match(run('lotSelect()'),/<select id="lot">/);assert.match(run('lotSelect()'),/value="032">Lote 032/);
+assert.equal(run("allLots()[0].animals[0].id"),'ANIMAL');
+ctx.modal=()=>{};ctx.toast=()=>{};ctx.save=()=>{};ctx.renderLots=()=>{};ctx.authorize=async()=>{run('editUnlocked=true');return true;};
+(async()=>{
+await run('openLotForm()');assert.equal(node('#lot-id').disabled,true);
+for(const [key,value]of Object.entries({'lot-id':'040','lot-kind':'Compra','lot-entry':'2026-01-01','lot-spent':'100','lot-planned':'2026-12-01','lot-actual':'','lot-received':''}))node('#'+key).value=value;
+node('#lot-form').onsubmit({preventDefault(){}});assert.match(node('#lot-error').textContent,/senha/);assert.equal(run('db.lots.length'),1);
+node('#lot-id').value='033';node('#lot-form').onsubmit({preventDefault(){}});assert.equal(run('db.lots.length'),2);
+await run('openLotForm(allLots().find(l=>l.id==="032"))');assert.equal(node('#lot-id').disabled,false);
+node('#lot-id').value='082';node('#lot-form').onsubmit({preventDefault(){}});assert.equal(run('db.animals[0].lot'),'082');assert.equal(run("allLots().find(l=>l.id==='082').animals[0].id"),'ANIMAL');assert.equal(run('nextLotNumber()'),'083');
+console.log('PASS numeração: seleção, 032→033, migração, vínculo, limite, bloqueio sem senha e renomeação autorizada.');
+})().catch(e=>{console.error(e);process.exitCode=1});

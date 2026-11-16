@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="pt-BR">
+  <meta charset="utf-8" /><meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+  /><meta name="theme-color" content="#121212" /><title>
+    Fazenda Santa Elfrides</title
+  ><link rel="stylesheet" href="style.css" />
+  <body>
+    <section id="login-screen">
+      <form id="login-form" class="card">
+        <div class="brand">Fazenda Santa Elfrides<span>GESTÃO DO REBANHO</span></div>
+        <h1>Entrar</h1>
+        <p>Acesse os registros da propriedade.</p>
+        <label for="login-user">Login</label
+        ><input id="login-user" autocomplete="username" required /><label
+          for="login-password"
+          >Senha</label
+        ><input
+          id="login-password"
+          type="password"
+          autocomplete="current-password"
+          required
+        />
+        <p id="login-error" role="alert"></p>
+        <button class="primary" type="submit">Entrar</button>
+      </form>
+    </section>
+    <aside>
+      <div class="brand">Fazenda Santa Elfrides<span>GESTÃO DO REBANHO</span></div>
+      <nav>
+        <button data-tab="consulta">↗ Consultar animal</button>
+        <button data-tab="individual">📋 Registro individual</button>
+        <button data-tab="sessao">🐄 Pesagem em sequência</button>
+        <button data-tab="campo">🌾 Campo</button>
+        <button data-tab="lotes">📦 Lotes</button>
+      </nav>
+      <div class="asidefoot">Feito para o dia a dia<br />do campo.</div>
+    </aside>
+    <main>
+      <header>
+        <span>MINHA PROPRIEDADE</span>
+        <div class="header-actions">
+          <button id="settings">Dados e segurança ⚙</button
+          ><button id="logout">Sair</button>
+        </div>
+      </header>
+      <div class="heading">
+        <div>
+          <h1 id="title"></h1>
+          <p id="subtitle"></p>
+        </div>
+        <span class="pill">● Dados neste aparelho</span>
+      </div>
+      <div id="stats" class="stats"></div>
+      <section id="view"></section>
+      <footer>
+        Armazenamento local • Faça cópias dos dados em “Dados e segurança”.<br />Compartilhamento,
+        sincronização e backup automático ainda não estão ativos.
+      </footer>
+    </main>
+    <dialog id="modal">
+      <div id="modalbody"></div>
+      <button
+        id="modal-close"
+        onclick="document.querySelector('dialog').close()"
+      >
+        Fechar
+      </button>
+    </dialog>
+    <div id="toast" role="status"></div>
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/rules.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/records.js"></script>
+    <script src="js/consult.js"></script>
+    <script src="js/exits.js"></script>
+    <script src="js/campo.js"></script>
+    <script src="js/auth.js"></script>
+
+    <script src="js/returns.js"></script>
+    <script src="js/files.js"></script>
+    <script src="js/lots.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>

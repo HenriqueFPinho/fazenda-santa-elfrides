@@ -1,0 +1,25 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const nodes={};const node=s=>nodes[s]||={value:'',files:[],dataset:{},open:false,close(){this.open=false;},focus(){},reset(){},querySelectorAll(){return []}};
+let failure=false,message='',downloaded,confirmation=true;
+const ctx=vm.createContext({document:{querySelector:node,querySelectorAll:()=>[],body:{classList:{add(){},remove(){}}}},localStorage:{getItem:()=>null,setItem(){if(failure)throw Error('Sem espaço')}},crypto:require('node:crypto').webcrypto,TextEncoder,confirm:()=>confirmation});
+for(const f of ['config','utils','rules','lots','ui','records','auth','demo','returns','files','consult','exits'])vm.runInContext(fs.readFileSync((f==='demo'?`${__dirname}/fixtures/demo.js`:`${__dirname}/../dist/js/${f}.js`),'utf8'),ctx);
+const run=s=>vm.runInContext(s,ctx);
+ctx.stats=()=>{};ctx.render=()=>{};ctx.toast=s=>message=s;ctx.modal=()=>{};ctx.lookup=()=>{};ctx.download=(...args)=>{downloaded=args;};
+vm.runInContext(fs.readFileSync(`${__dirname}/../dist/js/app.js`,'utf8'),ctx);
+const event={preventDefault(){}};
+(async()=>{
+node('#login-user').value='admin';node('#login-password').value='errada';await node('#login-form').onsubmit(event);assert.equal(run('signedIn'),false);
+node('#login-password').value='1234';await node('#login-form').onsubmit(event);assert.equal(run('signedIn'),true);assert.equal(run('db.animals.length'),0);run("db=addDemoAnimals({animals:[],session:[]},today())");
+node('#settings').onclick();node('#backup').onclick();assert.match(downloaded[0],/^campo-backup-.*\.json$/);assert.equal(JSON.parse(downloaded[1]).animals.length,40);assert.equal(downloaded[2],'application/json');
+ctx.authorize=async()=>true;
+const backup=downloaded[1];
+node('#restore').files=[{text:async()=>backup}];await node('#restore').onchange({target:node('#restore')});assert.equal(run('db.animals.length'),40);
+node('#restore').files=[{text:async()=>' {"animals":[null],"session":[]}'}];await node('#restore').onchange({target:node('#restore')});assert.equal(run('db.animals.length'),40);
+node('#restore').files=[{text:async()=>'{"animals":[],"session":[]}'}];confirmation=false;await node('#restore').onchange({target:node('#restore')});assert.equal(run('db.animals.length'),40);
+confirmation=true;failure=true;await node('#restore').onchange({target:node('#restore')});failure=false;assert.equal(run('db.animals.length'),40);
+run("editUnlocked=true;var selected=db.animals[0]");await run('openExit(selected)');node('#exit-reason').value='Venda';node('#exit-recipient').value='Comprador teste';node('#exit-day').value='2026-11-07';node('#exit-amount').value='2000';await node('#exit-form').onsubmit(event);assert.equal(run('selected.exit.reason'),'Venda');
+await run('removeExit(selected)');node('#confirm-remove-exit').onclick();assert.equal(run('selected.exit'),undefined);
+run('confirmDeleteAnimal(selected)');await node('#confirm-delete-animal').onclick();assert.equal(run('db.animals.length'),39);
+node('#logout').onclick();assert.equal(run('signedIn'),false);assert.equal(run('editUnlocked'),false);
+console.log('PASS fluxos: login correto/incorreto, botão backup, restauração/cancelamento/falha, saída, exclusões e logout.');
+})().catch(e=>{console.error(e);process.exitCode=1});

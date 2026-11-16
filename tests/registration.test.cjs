@@ -1,0 +1,24 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const nodes={};const node=s=>nodes[s]||={value:'',checked:false,dataset:{},focus(){}};
+let stored,fail=false,message='';
+const ctx=vm.createContext({localStorage:{getItem:()=>null,setItem:(k,v)=>{if(fail)throw Error('Quota');stored=v;}},document:{querySelector:node},crypto:require('node:crypto').webcrypto,TextEncoder});
+for(const f of ['config','utils','rules','lots','ui','records','auth'])vm.runInContext(fs.readFileSync(`${__dirname}/../dist/js/${f}.js`,'utf8'),ctx);
+const run=s=>vm.runInContext(s,ctx);
+ctx.render=()=>{};ctx.stats=()=>{};ctx.toast=s=>message=s;ctx.confirmRecord=async()=>true;ctx.showDepartedMessage=()=>{message='blocked'};
+function fields(id,weight,day='2026-11-07'){node('#brinco').value=id;node('#brinco').dataset.verified=id;node('#weight').value=weight;node('#day').value=day;node('#vaccinated').checked=false;for(const k of ['age','breed','sex','arrival','origin','from','entryPriceKg','lot'])node('#'+k).value='';}
+(async()=>{
+assert.equal(await run("hash('1234').then(h=>h===LOGIN_HASH)"),true);
+assert.equal(await run("hash('220405').then(h=>h===SECURITY_HASH)"),true);
+run("db.lots=[{id:'001'}];tab='individual'");fields('TESTE','');node('#age').value='0';node('#entryPriceKg').value='12.75';node('#lot').value='001';await run('submit({preventDefault(){}})');assert.equal(run("find('TESTE').age"),'0');assert.equal(run("find('TESTE').weights.length"),0);assert.equal(run("find('TESTE').entryPriceKg"),'12.75');assert.equal(run("find('TESTE').lot"),'001');
+fields('TESTE','');node('#vaccinated').checked=true;node('#vname').value='Vacina histórica';node('#vday').value='2025-12-10';node('#next').value='2026-12-10';await run('submit({preventDefault(){}})');assert.equal(run("find('TESTE').vaccines[0].day"),'2025-12-10');
+fields('TESTE','300');await run('submit({preventDefault(){}})');assert.equal(run("find('TESTE').weights.length"),0);
+run("tab='sessao'");fields('TESTE','300');await run('submit({preventDefault(){}})');assert.equal(run("find('TESTE').weights.length"),1);
+fields('TESTE','310');fail=true;await run('submit({preventDefault(){}})');fail=false;assert.equal(run("find('TESTE').weights.length"),1);assert.equal(JSON.parse(stored).animals[0].weights.length,1);
+fields('TESTE','320');delete node('#brinco').dataset.verified;await run('submit({preventDefault(){}})');assert.match(message,/Verifique/);
+fields('TESTE','-1');await run('submit({preventDefault(){}})');assert.match(message,/peso válido/);
+run("find('TESTE').exit={reason:'Morte',day:'2026-11-07',detail:'Teste'}");fields('TESTE','330');await run('submit({preventDefault(){}})');assert.equal(message,'blocked');
+run('editUnlocked=true');await run('submit({preventDefault(){}})');assert.equal(run("find('TESTE').weights.length"),2);
+run("tab='sessao';db.session=[]");fields('NOVO','250');node('#bathed').checked=true;node('#vaccinated').checked=true;node('#vname').value='Teste';node('#vday').value='2026-11-07';node('#next').value='2026-12-07';await run('submit({preventDefault(){}})');assert.equal(run("find('NOVO').vaccines.length"),1);assert.equal(run("find('NOVO').vaccines[0].day"),'2026-11-07');assert.equal(run("find('NOVO').baths[0].day"),'2026-11-07');assert.equal(run('db.session.length'),1);
+ctx.confirmRecord=async()=>false;fields('CANCELADO','200');await run('submit({preventDefault(){}})');assert.equal(run("find('CANCELADO')"),undefined);
+console.log('PASS registros: senha, cadastro parcial, idade zero, peso, vacina, sessão, cancelamento, bloqueio, autorização e rollback.');
+})().catch(e=>{console.error(e);process.exitCode=1});

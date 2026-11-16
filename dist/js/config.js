@@ -1,0 +1,32 @@
+// Configuração e estado local
+
+let storageError = null;
+let storedData = null;
+let db = {animals: [], session: []};
+try {
+  storedData = localStorage.getItem("campo-v1");
+  if (storedData) db = JSON.parse(storedData);
+  if (!db || !Array.isArray(db.animals) || !Array.isArray(db.session)) throw Error("Formato inválido.");
+} catch (error) {
+  storageError = error;
+  db = {animals: [], session: []};
+}
+
+let tab = "consulta";
+
+const PROFILE_FIELDS = ["age", "sex", "breed", "arrival", "origin", "from", "entryPriceKg", "lot"];
+
+let signedIn = false;
+
+let editUnlocked = false;
+
+let currentRole = null;
+
+const SECURITY_HASH =
+  "688e86ef1bc1bf27cac386b180b23cf3c8bb3d50b634c69a5d38bb8283438772";
+
+const LOGIN_HASH =
+  "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4";
+
+const DEPARTED_MESSAGE =
+  "O animal verificado não pode mais ter informações alteradas, pois não está presente no campo. Caso necessário, entre em contato com a equipe responsável pelo sistema.";

@@ -1,0 +1,24 @@
+const fs=require('node:fs');
+const vm=require('node:vm');
+const assert=require('node:assert/strict');
+const ctx=vm.createContext({localStorage:{getItem:()=>null},document:{querySelector:()=>null}});
+for(const f of ['config','utils','rules','returns'])vm.runInContext(fs.readFileSync(`${__dirname}/../dist/js/${f}.js`,'utf8'),ctx);
+const run=s=>vm.runInContext(s,ctx);
+assert.equal(run('canReturnAnimal(undefined)'),false);
+assert.equal(run("canReturnAnimal({exit:{reason:'Morte'}})"),false);
+run("var a={id:'TESTE',weights:[{kg:300}],vaccines:[{name:'Teste'}],exit:{reason:'Venda',day:'2026-01-01'}}; var v={type:'Compra',day:'2026-02-01',from:'Fazenda teste',amount:'1500.50'};");
+assert.equal(run('validateReturn(a,v).amount'),1500.5);
+for(const patch of ["{amount:'-1'}","{from:''}","{day:'2025-12-31'}","{day:'2026-02-31'}","{type:'Outra'}"]){assert.throws(()=>run(`validateReturn(a,{...v,...${patch}})`));}
+run('var b=applyAnimalReturn(a,validateReturn(a,v))');
+assert.equal(run('animalStatus(b)'),'presente');
+assert.equal(run('b.movements[0].exit.reason'),'Venda');
+assert.equal(run('a.exit.reason'),'Venda');
+assert.equal(run('b.weights[0].kg'),300);
+assert.equal(run('b.vaccines[0].name'),'Teste');
+run("b.exit={reason:'Transferência',day:'2026-03-01'}; var t={type:'Transferência',day:'2026-04-01',transferReason:'Fim de empréstimo'};");
+assert.throws(()=>run("validateReturn(b,{...t,transferReason:''})"));
+run('var c=applyAnimalReturn(b,validateReturn(b,t))');
+assert.equal(run('c.movements.length'),2);
+assert.equal(run('animalStatus(c)'),'presente');
+assert.equal(run('registrationBlocked(c,false)'),false);
+console.log('Retornos: validações, recompra, transferência, histórico e desbloqueio verificados.');
