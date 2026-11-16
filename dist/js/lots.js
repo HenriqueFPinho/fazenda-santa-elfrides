@@ -101,7 +101,7 @@ function updateLots() {
 function viewLot(lot) {
   lot = allLots().find(item => item.id === lot.id) || lot;
   const outcome = lotOutcome(lot);
-  modal(`<h2>Lote ${esc(lot.id)}</h2><p>${esc(lot.kind || 'Complete os dados deste lote')} · Entrada: ${date(lot.entryDate)}</p><dl class="animal-details"><div><dt>Propriedade de origem</dt><dd>${esc(lot.originProperty || 'Não informada')}</dd></div><div><dt>Valor total gasto</dt><dd>${money(lot.spent)}</dd></div><div><dt>Previsão de saída</dt><dd>${date(lot.plannedExitDate)}</dd></div><div><dt>${esc(outcome.label)}</dt><dd>${date(outcome.day)}</dd></div><div><dt>Valor recebido</dt><dd>${outcome.received !== undefined ? money(outcome.received) : 'Não informado'}</dd></div></dl>${outcome.automatic ? '<p>Resultado calculado pelas saídas registradas nas fichas dos animais.</p>' : ''}<h3>Animais vinculados (${lot.animals.length})</h3><div class="lot-animals">${lot.animals.map((a,i)=>`<button type="button" data-member="${i}">${esc(a.id)} · ${statusLabel(animalStatus(a))}</button>`).join('') || '<p>Nenhum animal vinculado.</p>'}</div>${lotAcceptsAnimals(lot) ? `<section class="lot-add-section"><h3>Adicionar animais ao lote</h3>${field("lot-animal-search", "Buscar animal pelo brinco")}<div id="lot-candidates" class="lot-candidates"></div><p id="lot-add-error" role="alert"></p><button type="button" class="primary" id="add-lot-animals" disabled>Adicionar selecionados</button></section>` : ""}<div class="actions lot-detail-actions"><button id="lot-detail-back">Voltar</button><div class="lot-admin-tools"><button id="edit-lot" class="admin-icon" aria-label="Editar lote" title="Editar lote">⚙</button><button id="delete-lot" class="admin-icon" aria-label="Excluir lote" title="Excluir lote"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/></svg></button></div></div>`);
+  modal(`<h2>Lote ${esc(lot.id)}</h2><p>${esc(lot.kind || 'Complete os dados deste lote')} · Entrada: ${date(lot.entryDate)}</p><dl class="animal-details"><div><dt>Propriedade de origem</dt><dd>${esc(lot.originProperty || 'Não informada')}</dd></div><div><dt>Valor total gasto</dt><dd>${money(lot.spent)}</dd></div><div><dt>Previsão de saída</dt><dd>${date(lot.plannedExitDate)}</dd></div><div><dt>${esc(outcome.label)}</dt><dd>${date(outcome.day)}</dd></div><div><dt>Valor recebido</dt><dd>${outcome.received !== undefined ? money(outcome.received) : 'Não informado'}</dd></div></dl>${outcome.automatic ? '<p>Resultado calculado pelas saídas registradas nas fichas dos animais.</p>' : ''}<h3>Animais vinculados (${lot.animals.length})</h3><div class="lot-animals">${lot.animals.map((a,i)=>`<button type="button" data-member="${i}">${esc(a.id)} · ${statusLabel(animalStatus(a))}</button>`).join('') || '<p>Nenhum animal vinculado.</p>'}</div>${lotAcceptsAnimals(lot) ? `<section class="lot-add-section"><div id="lot-selection"><h3>Adicionar animais ao lote</h3>${field("lot-animal-search", "Buscar animal pelo brinco")}<div id="lot-candidates" class="lot-candidates"></div><button type="button" class="primary" id="add-lot-animals" disabled>Adicionar selecionados</button></div><div id="lot-confirmation" hidden><h3>Deseja confirmar registro? Alteração não poderá ser revogada</h3><p id="lot-confirm-error" role="alert"></p><div class="actions"><button type="button" class="primary" id="confirm-lot-animals">Confirmar</button><button type="button" id="cancel-lot-animals">Voltar</button></div></div></section>` : ""}<div class="actions lot-detail-actions"><button id="lot-detail-back">Voltar</button><div class="lot-admin-tools"><button id="edit-lot" class="admin-icon" aria-label="Editar lote" title="Editar lote">⚙</button><button id="delete-lot" class="admin-icon" aria-label="Excluir lote" title="Excluir lote"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/></svg></button></div></div>`);
   if (lotAcceptsAnimals(lot)) bindLotAnimalSelection(lot.id);
   $('#modal-close').hidden=true;
   $('#lot-detail-back').onclick=()=>$('#modal').close();
@@ -235,6 +235,18 @@ function bindLotAnimalSelection(lotId) {
   };
   $('#lot-animal-search').oninput = refresh;
   $('#add-lot-animals').onclick = () => {
+    if (!signedIn || !selected.size) return;
+    $('#lot-confirm-error').textContent = '';
+    $('#lot-selection').hidden = true;
+    $('#lot-confirmation').hidden = false;
+    $('#confirm-lot-animals').focus();
+  };
+  $('#cancel-lot-animals').onclick = () => {
+    $('#lot-confirmation').hidden = true;
+    $('#lot-selection').hidden = false;
+    $('#add-lot-animals').focus();
+  };
+  $('#confirm-lot-animals').onclick = () => {
     if (!signedIn) return;
     const previous = db;
     try {
@@ -242,7 +254,7 @@ function bindLotAnimalSelection(lotId) {
       save();
     } catch (error) {
       db = previous;
-      $('#lot-add-error').textContent = error.message || 'Não foi possível salvar os vínculos. Tente novamente.';
+      $('#lot-confirm-error').textContent = error.message || 'Não foi possível salvar os vínculos. Tente novamente.';
       return;
     }
     updateLots();
