@@ -3,8 +3,9 @@ let loginAttempt = 0;
 
 $("#settings").onclick = () => {
   modal(
-    '<h2>Dados e segurança</h2><p>No momento, não há sincronização entre aparelhos ou backup, todos os dados ficam salvos neste navegador deste aparelho.</p><p>Por tanto, é possível baixar uma cópia dos arquivos registrados. Assim como, também é possível anexar o arquivo para visualiza-los no site.</p><p>Caso necessite realizar edição ou exclusão de dados, verifique a senha de proteção para liberar a ferramenta de edição e exclusão.</p><div class="actions"><button id="backup">Baixar cópia de segurança</button><button id="pin">Verificar senha</button></div><label>Restaurar cópia de segurança (substitui dados locais)</label><input type="file" id="restore" accept="application/json"><p>Guarde a cópia em um local seguro. Limpar os dados do navegador pode apagar os registros.</p>',
+    '<h2>Dados e segurança</h2><p>No momento, não há sincronização entre aparelhos ou backup, todos os dados ficam salvos neste navegador deste aparelho.</p><p>Por tanto, é possível baixar uma cópia dos arquivos registrados. Assim como, também é possível anexar o arquivo para visualiza-los no site.</p><p>Caso necessite realizar edição ou exclusão de dados, verifique a senha de proteção para liberar a ferramenta de edição e exclusão.</p><div class="actions"><button id="backup">Baixar cópia de segurança</button><button id="pin">Verificar senha</button></div><label>Restaurar cópia de segurança (substitui dados locais)</label><input type="file" id="restore" accept="application/json"><p>Guarde a cópia em um local seguro. Limpar os dados do navegador pode apagar os registros.</p><h3>Dados fictícios para teste</h3><p>Substitui todos os animais e lotes atuais por exemplos variados.</p><button id="test-data">Substituir por exemplos fictícios</button>',
   );
+  $("#test-data").onclick = () => replaceWithTestData();
   $("#backup").onclick = () =>
     download(
       "campo-backup-" + today() + ".json",
