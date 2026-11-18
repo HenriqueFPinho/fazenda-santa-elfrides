@@ -174,7 +174,7 @@ function visibleProfileKeys() {
 }
 
 function profileFields() {
-  return `<div class="fields">${profileSelect("age", "Idade estimada (anos)", AGE_RANGES)}<div><label>Sexo</label><select id="sex"><option value="">Não informado</option><option value="F">Fêmea</option><option value="M">Macho</option></select></div>${profileSelect("breed", "Raça", BREEDS)}${tab === "individual" ? field("arrival", "Data de entrada", "date") : ""}${tab === "individual" ? `<div><label>Origem</label><select id="origin"><option value="">Não informada</option><option>Criação própria</option><option>Compra</option><option>Transferência</option></select></div>${field("from", "Pessoa / propriedade de origem")}` : ""}${field("entryPriceKg", "Preço do kg de entrada (R$)", "number")}${lotSelect()}</div>`;
+  return `<div class="fields">${profileSelect("age", "Idade estimada (Meses)", AGE_RANGES)}<div><label>Sexo</label><select id="sex"><option value="">Não informado</option><option value="F">Fêmea</option><option value="M">Macho</option></select></div>${profileSelect("breed", "Raça", BREEDS)}${tab === "individual" ? field("arrival", "Data de entrada", "date") : ""}${tab === "individual" ? `<div><label>Origem</label><select id="origin"><option value="">Não informada</option><option>Criação própria</option><option>Compra</option><option>Transferência</option></select></div>${field("from", "Pessoa / propriedade de origem")}` : ""}${field("entryPriceKg", "Preço do kg de entrada (R$)", "number")}${lotSelect()}</div>`;
 }
 
 function profileEditingActive() {
