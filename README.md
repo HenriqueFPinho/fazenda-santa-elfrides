@@ -22,6 +22,17 @@ Sistema de cadastro e manejo do rebanho em HTML, CSS e JavaScript, sem dependên
 Os scripts compartilham o escopo da página; mantenha a ordem presente no HTML.
 Nenhum animal de exemplo é criado ou excluído automaticamente em produção.
 
+## Instalar e usar sem internet
+
+No Android, abra o site no Chrome com internet, aguarde o indicador
+"Pronto para uso offline" e use o menu do navegador → "Instalar aplicativo"
+(ou "Adicionar à tela inicial"). Depois disso, o sistema pode ser aberto
+no mesmo aparelho sem Wi-Fi ou dados móveis. Teste com o modo avião antes
+de ir ao curral.
+
+O cache mantém os arquivos do aplicativo disponíveis, mas não sincroniza
+registros entre aparelhos. Preserve os backups de "Dados e segurança".
+
 ## Verificação
 
 ```sh
