@@ -192,6 +192,7 @@ dialog {
   padding: 28px;
 }
 #toast {
+  text-align: center;
   position: fixed;
   bottom: 25px;
   left: 50%;
@@ -375,38 +376,6 @@ dialog::backdrop {
 }
 .empty i {
   color: #a2c982;
-}
-.search-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: end;
-  gap: 14px;
-}
-.search-row .actions {
-  margin: 0;
-  display: block;
-}
-.search-row input,
-.search-row button {
-  height: 50px;
-  min-height: 50px;
-}
-.search-row button {
-  white-space: nowrap;
-  padding: 0 22px;
-  flex: none;
-}
-.search-row input {
-  width: 100%;
-}
-@media (max-width: 480px) {
-  .search-row {
-    gap: 10px;
-  }
-  .search-row button {
-    padding: 0 14px;
-    font-size: 13px;
-  }
 }
 @media print {
   body,
@@ -613,7 +582,8 @@ dialog {
 
 .download-link { color: #c7e4b4; overflow-wrap: anywhere; display: inline-block; padding: 12px 0; }
 
-.lot-card { border-top: 1px solid #444; padding: 20px 0; }
+.lot-card { padding: 20px 0; }
+.lot-card + .lot-card { border-top: 1px solid #444; }
 .lot-card p { overflow-wrap: anywhere; }
 .lot-animals { display: flex; flex-wrap: wrap; gap: 10px; }
 #lot-error { color: #ffb1b1; }
@@ -685,3 +655,13 @@ dialog {
     margin: 0;
   }
 }
+
+
+[hidden]{display:none!important}
+
+.animal-lot-picker + #profile-fields {
+  margin-top: 24px;
+}
+
+#modal label.merge-choice { display: flex; align-items: center; gap: .65rem; }
+#modal .merge-choice input[type="radio"] { flex: 0 0 auto; width: 1.1rem; height: 1.1rem; min-height: 0; margin: 0; padding: 0; }

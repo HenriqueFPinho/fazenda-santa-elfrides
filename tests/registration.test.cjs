@@ -4,8 +4,9 @@ let stored,fail=false,message='';
 const ctx=vm.createContext({localStorage:{getItem:()=>null,setItem:(k,v)=>{if(fail)throw Error('Quota');stored=v;}},document:{querySelector:node},crypto:require('node:crypto').webcrypto,TextEncoder});
 for(const f of ['config','utils','rules','lots','ui','records','auth'])vm.runInContext(fs.readFileSync(`${__dirname}/../dist/js/${f}.js`,'utf8'),ctx);
 const run=s=>vm.runInContext(s,ctx);
+run("signedIn=true;currentRole='operador'");
 ctx.render=()=>{};ctx.stats=()=>{};ctx.toast=s=>message=s;ctx.confirmRecord=async()=>true;ctx.showDepartedMessage=()=>{message='blocked'};
-function fields(id,weight,day='2026-11-07'){node('#brinco').value=id;node('#brinco').dataset.verified=id;node('#weight').value=weight;node('#day').value=day;node('#vaccinated').checked=false;for(const k of ['age','breed','sex','arrival','origin','from','entryPriceKg','lot'])node('#'+k).value='';}
+function fields(id,weight,day='2026-11-07'){node('#brinco').value=id;node('#brinco').dataset.verified=id;node('#brinco').dataset.color='Verde';node('#tag-color').value='Verde';node('#new-animal').checked=!run('find('+JSON.stringify(id)+')');node('#weight').value=weight;node('#day').value=day;node('#vaccinated').checked=false;for(const k of ['age','breed','sex','arrival','origin','from','entryPriceKg','lot'])node('#'+k).value='';}
 (async()=>{
 assert.equal(await run("hash('1234').then(h=>h===LOGIN_HASH)"),true);
 assert.equal(await run("hash('220405').then(h=>h===SECURITY_HASH)"),true);

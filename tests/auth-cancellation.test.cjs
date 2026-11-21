@@ -16,7 +16,7 @@ function setup() {
     close() { listeners.get('close')?.(); }
   });
   const ctx = vm.createContext({
-    signedIn: true, editUnlocked: false, SECURITY_HASH: 'correct',
+    signedIn: true, currentRole: "operador", editUnlocked: false, SECURITY_HASH: 'correct',
     $: node, modal() {}, toast() {}, refreshProfileLocks() {}
   });
   vm.runInContext(fs.readFileSync(__dirname + '/../dist/js/auth.js', 'utf8'), ctx);

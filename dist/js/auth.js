@@ -15,6 +15,7 @@ async function authorize() {
     toast("Entre para continuar.");
     return false;
   }
+  if (!canManageAnimal()) return false;
   if (editUnlocked) return true;
   return new Promise((resolve) => {
     modal(
@@ -64,5 +65,5 @@ async function authorize() {
 }
 
 function canManageAnimal() {
-  return signedIn && ["admin", "developer"].includes(currentRole);
+  return signedIn && ["tecnico", "operador", "admin"].includes(currentRole);
 }

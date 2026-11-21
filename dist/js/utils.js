@@ -40,22 +40,33 @@ const due = () =>
     0,
   );
 
+function animalsWithTag(tag) {
+  return db.animals.filter(a => (a.tagNumber || a.id) === tag);
+}
+
+function newAnimalId(tag) {
+  let key = tag;
+  let sequence = 1;
+  while (find(key)) key = tag + " [" + (++sequence) + "]";
+  return key;
+}
+
+function chooseAnimal(matches, select) {
+  modal('<h2>Selecione a ficha do animal</h2>' + matches.map((a,i) =>
+    `<p><button type="button" data-choice="${i}">${["Ficha "+a.id,a.tagColor,a.breed,a.sex==="F"?"Fêmea":a.sex==="M"?"Macho":a.sex,a.age && a.age+" meses",a.origin,a.from,a.arrival && "Entrada "+date(a.arrival),animalLots(a).map(id=>"Lote "+id).join(", ")].filter(Boolean).map(esc).join(" · ")}</button></p>`
+  ).join(""));
+  $("#modalbody").querySelectorAll("[data-choice]").forEach(b => b.onclick = () => {
+    $("#modal").close();
+    select(matches[Number(b.dataset.choice)]);
+  });
+}
+
 function find(id) {
   return db.animals.find((a) => a.id === id.trim().toUpperCase());
 }
 
 const hasInfo = (value) =>
   value !== undefined && value !== null && String(value).trim() !== "";
-
-function csv(s) {
-  return (
-    '"' +
-    String(s)
-      .replace(/^[=+@-]/, "'")
-      .replaceAll('"', '""') +
-    '"'
-  );
-}
 
 function vaccinationBadge(next) {
   if (!next) return '';
@@ -74,7 +85,7 @@ function validDate(value) {
 const money = value => hasInfo(value) ? Number(value).toLocaleString('pt-BR', {style:'currency',currency:'BRL'}) : 'Não informado';
 
 function entryDetails(animal) {
-  return `<dl class="animal-details"><div><dt>Preço do Kilo de Entrada</dt><dd>${money(animal.entryPriceKg)}</dd></div><div><dt>Preço do Kilo de Saída</dt><dd>${money(animal.exit?.priceKg)}</dd></div><div><dt>Nº do Lote</dt><dd>${esc(hasInfo(animal.lot) ? animal.lot : 'Não informado')}</dd></div></dl>`;
+  return `<dl class="animal-details"><div><dt>Cor do brinco</dt><dd>${esc(animal.tagColor || "Não informada")}</dd></div><div><dt>Preço do Kilo de Entrada</dt><dd>${money(animal.entryPriceKg)}</dd></div><div><dt>Preço do Kilo de Saída</dt><dd>${money(animal.exit?.priceKg)}</dd></div><div><dt>Nº do Lote</dt><dd>${esc(animalLots(animal).join(', ') || 'Não informado')}</dd></div></dl>`;
 }
 
 function bathHistory(animal) {
@@ -82,6 +93,7 @@ function bathHistory(animal) {
   return `<section><h3>Histórico de banhos</h3>${baths.length ? baths.map(b=>`<div class="row"><span>${date(b.day)}</span><span>Gado banhado</span></div>`).join('') : '<p>Nenhum banho registrado.</p>'}</section>`;
 }
 
+const TAG_COLORS = ["Vermelho", "Azul", "Amarelo", "Laranja", "Verde", "Outro"];
 const AGE_RANGES = ['0 a 12', '13 a 24', '25 a 36', '37+'];
 const BREEDS = ['Angus preto', 'Angus vermelho', 'Hereford', 'Braford', 'Brangus', 'Charolês', 'Devon', 'Outros'];
 function ageMinimum(value) { return Number(String(value).split(' ')[0].replace('+', '')); }

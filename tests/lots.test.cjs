@@ -1,7 +1,7 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 const nodes={};const node=s=>nodes[s]||={value:'',dataset:{},querySelectorAll:()=>[],close(){},focus(){}};
 let saved=false,fail=false;
-const ctx=vm.createContext({document:{querySelector:node},localStorage:{getItem:()=>null}});
+const ctx=vm.createContext({canManageAnimal:()=>true,document:{querySelector:node},localStorage:{getItem:()=>null}});
 for(const f of ['config','utils','rules','ui','records','returns','files','lots']) vm.runInContext(fs.readFileSync(`${__dirname}/../dist/js/${f}.js`,'utf8'),ctx);
 const run=s=>vm.runInContext(s,ctx);
 run("var draft={id:'003',kind:'Compra',entryDate:'2026-01-01',spent:'2500.50',plannedExitDate:'2026-12-01'};");

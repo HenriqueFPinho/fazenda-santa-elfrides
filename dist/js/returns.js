@@ -3,11 +3,11 @@ const RETURN_MESSAGE = 'O animal verificado não pode mais ter informações alt
 function canReturnAnimal(animal) {
   return Boolean(animal) && ['vendido', 'transferido'].includes(animalStatus(animal));
 }
-function offerAnimalReturn(animal) {
+function offerAnimalReturn(animal, onReturn) {
   modal(`<h2>Registrar retorno</h2><p>${RETURN_MESSAGE}</p><div class="actions"><button id="return-yes" class="primary">Sim</button><button id="return-no">Não</button></div>`);
   $('#modal-close').hidden = true;
   $('#return-no').onclick = () => $('#modal').close();
-  $('#return-yes').onclick = () => openReturnForm(animal);
+  $('#return-yes').onclick = () => openReturnForm(animal, onReturn);
 }
 function validateReturn(animal, values) {
   if (!canReturnAnimal(animal)) throw Error('Este animal não pode ter um retorno registrado.');
@@ -23,10 +23,10 @@ function applyAnimalReturn(animal, record) {
   delete updated.exit;
   return updated;
 }
-function openReturnForm(animal) {
+function openReturnForm(animal, onReturn) {
   modal(`<form id="return-form"><h2>Retorno do animal ${esc(animal.id)}</h2><label for="return-type">Motivo do retorno</label><select id="return-type" required><option value="">Selecione</option><option>Compra</option><option>Transferência</option></select><div id="return-fields"></div><p id="return-error" role="alert"></p><div class="actions"><button type="submit" class="primary">Registrar retorno</button><button type="button" id="return-back">Voltar</button></div></form>`);
   $('#modal-close').hidden=true;
-  $('#return-back').onclick=()=>offerAnimalReturn(animal);
+  $('#return-back').onclick=()=>offerAnimalReturn(animal, onReturn);
   $('#return-type').onchange=()=>{
     const type=$('#return-type').value;
     $('#return-fields').innerHTML=type==='Compra'?`${field('return-amount','Valor gasto (R$)','number')}${field('return-day','Data da compra','date',today())}${field('return-from','De quem foi comprado')}`:type==='Transferência'?`${field('return-transfer-reason','Motivo da transferência')}${field('return-day','Data da transferência','date',today())}`:'';
@@ -43,7 +43,9 @@ function openReturnForm(animal) {
       db={...db,animals:db.animals.map(a=>a.id===animal.id?updated:a)};
       save();
     } catch(error){db=previous;$('#return-error').textContent=error.message||'Não foi possível salvar o retorno.';return;}
-    $('#modal').close();render();$('#brinco').value=animal.id;$('#verify').click();toast('Retorno registrado. O animal está novamente na fazenda.');
+    $('#modal').close();
+    onReturn(db.animals.find(a => a.id === animal.id));
+    toast('Retorno registrado. O animal está novamente na fazenda.');
   };
 }
 function movementHistory(animal) {

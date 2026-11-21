@@ -1,6 +1,6 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 const nodes={};const node=s=>nodes[s]||={value:'',dataset:{},querySelectorAll:()=>[],close(){}};
-const ctx=vm.createContext({localStorage:{getItem:()=>null},document:{querySelector:node}});
+const ctx=vm.createContext({canManageAnimal:()=>true,localStorage:{getItem:()=>null},document:{querySelector:node}});
 for(const f of ['config','utils','rules','ui','lots'])vm.runInContext(fs.readFileSync(`${__dirname}/../dist/js/${f}.js`,'utf8'),ctx);
 const run=s=>vm.runInContext(s,ctx);
 assert.equal(run('nextLotNumber()'),'001');

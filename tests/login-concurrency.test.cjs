@@ -12,7 +12,7 @@ test('resultado de login antigo não substitui tentativa mais recente', async ()
   const pending = [];
   const context = vm.createContext({
     $: node, db: {animals: [], session: []}, storageError: null,
-    signedIn: false, currentRole: null, editUnlocked: false, LOGIN_HASH: 'correct',
+    signedIn: false, currentRole: null, editUnlocked: false, LOGIN_HASHES: {admin: 'correct'},
     document: {querySelectorAll: () => [], body: {classList: {add() {}, remove() {}}}},
     localStorage: {setItem() {}}, hash: () => new Promise(resolve => pending.push(resolve)),
     validateBackup() {}, normalizeLotNumbers: data => data, render() {}, toast() {}

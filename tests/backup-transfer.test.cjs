@@ -18,12 +18,13 @@ function browser(initial = null) {
     confirm:()=>true
   });
   const run = code => vm.runInContext(code, context);
-  for (const file of ['config','utils','rules','ui','records','lots','returns','files','campo','test-data']) {
+  for (const file of ['config','utils','rules','ui','records','lots','returns','files','campo','auth','test-data']) {
     run(fs.readFileSync(__dirname+'/../dist/js/'+file+'.js','utf8'));
   }
   context.render=()=>{};context.stats=()=>{};context.modal=()=>{};context.toast=()=>{};
   context.authorize=async()=>true;
   run(fs.readFileSync(__dirname+'/../dist/js/app.js','utf8'));
+  run("signedIn=true;currentRole='operador'");
   return {node,run,blob:()=>exportedBlob,stored:()=>stored};
 }
 
@@ -50,5 +51,5 @@ test('backup baixado transfere todos os registros para outro navegador e persist
   assert.equal(reopened.run('db.lots.length'),9);
   assert.equal(reopened.run("db.animals.every(a=>readOnlyAnimal(a).includes(a.id))"),true);
   assert.match(reopened.run('readOnlyAnimal(db.animals[0])'),/meses/);
-  assert.match(reopened.run("tab='individual';profileFields()"),/Idade estimada \(Meses\)/);
+  assert.match(reopened.run("tab='individual';profileFields()"),/Idade \(Em meses\)/);
 });

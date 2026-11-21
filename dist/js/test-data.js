@@ -12,6 +12,7 @@ function createTestAnimals(baseDate) {
   for (let i = 1; i <= 40; i++) {
     const departed = i > 24;
     const animal = {
+      tagColor: TAG_COLORS[(i-1) % TAG_COLORS.length],
       id: `DEMO${String(i).padStart(3,'0')}`,
       age: ['0 a 12', '13 a 24', '25 a 36', '37+'][(i-1)%4],
       sex: i % 2 ? 'F' : 'M',

@@ -1,14 +1,17 @@
 // Componentes e navegação
 
 function save() {
-  localStorage.setItem("campo-v1", JSON.stringify(db));
+  if (!canManageAnimal()) throw Error("Perfil sem permissão de gravação.");
+  persist(db);
   stats();
 }
 
+let toastTimer;
 function toast(s) {
+  clearTimeout(toastTimer);
   $("#toast").textContent = s;
   $("#toast").style.display = "block";
-  setTimeout(() => ($("#toast").style.display = "none"), 3500);
+  toastTimer = setTimeout(() => ($("#toast").style.display = "none"), 3500);
 }
 
 function stats() {
@@ -28,6 +31,11 @@ function field(id, label, type = "text", value = "") {
 }
 
 function render() {
+  const visual = currentRole === "visual";
+  const allowed = ["consulta", "campo", "lotes"];
+  if (visual && !allowed.includes(tab)) tab = "consulta";
+  $("#settings").hidden = visual;
+  document.querySelectorAll("[data-tab]").forEach(b => b.hidden = visual && !allowed.includes(b.dataset.tab));
   stats();
   document
     .querySelectorAll("[data-tab]")
@@ -53,15 +61,29 @@ function render() {
   }
   if (tab === "consulta") {
     $("#view").innerHTML =
-      `<div class="card"><h2>Consultar animal</h2><p>Informe o brinco para acessar a ficha completa.</p><div class="search-row">${field("search", "Número do brinco")}<div class="actions"><button class="primary" id="searchbtn">Buscar animal →</button></div></div><div id="result" class="empty"><i>◉</i>O histórico de cada animal, em um só lugar.</div></div>`;
-    $("#searchbtn").onclick = lookup;
-    $("#search").onkeydown = (e) => {
-      if (e.key === "Enter") lookup();
+      `<div class="card"><h2>Consultar animal</h2><div id="animal-search" role="search"><div class="fields">${field("search", "Número do brinco")}<div><label for="search-color">Cor do brinco</label><select id="search-color"><option value="">Selecione a cor</option>${TAG_COLORS.map(c=>`<option>${esc(c)}</option>`).join("")}${db.animals.some(a=>!a.tagColor)?'<option value="sem-cor">Sem cor registrada</option>':''}</select></div></div><div class="actions"><button type="button" class="primary" id="searchbtn">Buscar animal</button></div></div>${animalLotPicker()}<div id="result" class="empty"><i>◉</i>O histórico de cada animal, em um só lugar.</div></div>`;
+    $("#searchbtn").onclick = () => lookup();
+    $("#search").onkeydown = e => {
+      if (e.key === "Enter") { e.preventDefault(); lookup(); }
     };
+    $("#animal-search").oninput = () => {
+      $("#pick-lot").value = "";
+      $("#pick-animal").innerHTML = '<option value="">Selecione primeiro um lote</option>';
+      $("#pick-animal").disabled = true;
+      $("#result").textContent = "";
+    };
+    bindLotPicker(member => {
+      $("#search").value = member ? member.tagNumber || member.id : "";
+      $("#search-color").value = member ? member.tagColor || "sem-cor" : "";
+      $("#result").textContent = "";
+      if (member) lookup(member);
+    });
     return;
   }
   $("#view").innerHTML =
-    `<div class="grid ${tab === "individual" ? "individual-grid" : ""}"><form class="card" id="entry"><h2>${tab === "sessao" ? "Próximo animal" : "Dados do registro"}</h2><p>O registro será salvo após sua confirmação.</p>${field("brinco", "Brinco do animal")}<button type="button" id="verify" style="margin-top:12px">Verificar brinco</button>${animalLotPicker()}<div id="known" class="hint">Informe o brinco para continuar.</div>${tab === "sessao" ? `<div class="fields">${field("weight", "Peso (kg)", "number")}${field("day", "Data", "date", db.lastWeighingDay || today())}</div>` : ""}${tab === "sessao" ? '<label id="complete-option" hidden><input type="checkbox" id="complete-profile">Completar cadastro</label>' : ""}<div id="profile-fields" ${tab === "sessao" ? "hidden" : ""}>${profileFields()}</div><label><input type="checkbox" id="vaccinated">${tab === "sessao" ? "Vacinado nesta pesagem" : "Adicionar vacinação"}</label><div id="vfields" hidden>${tab === "sessao" ? '<label><input type="checkbox" id="repeat-vaccine">Aplicar na próxima pesagem</label>' : ""}${field("vname", "Nome da vacina")}<div class="fields">${tab === "individual" ? field("vday", "Data que foi realizada", "date", today()) : ""}${field("next", "Próxima dose (opcional)", "date")}</div></div>${tab === "sessao" ? '<label><input type="checkbox" id="bathed">Gado banhado</label>' : ""}<div class="actions"><button class="primary" type="submit">Registrar</button></div></form>${tab === "sessao" ? '<div class="card"><h2>Nesta sessão</h2><div id="sessionrows"></div></div>' : ""}</div>`;
+    `<div class="grid ${tab === "individual" ? "individual-grid" : ""}"><form class="card" id="entry"><div class="row"><h2>${tab === "sessao" ? "Próximo animal" : "Dados do registro"}</h2>${tab === "individual" && currentRole === "tecnico" ? '<button type="button" id="merge-animals">Vincular cadastros</button>' : ""}</div>${field("brinco", "Brinco do animal")}<label for="tag-color">Cor do brinco</label><select id="tag-color"><option value="">Selecione a cor</option>${TAG_COLORS.map(c => `<option>${c}</option>`).join("")}</select><label><input type="checkbox" id="new-animal">Novo cadastro</label><button type="button" id="verify" style="margin-top:12px">Verificar brinco</button><p>Informe o brinco e clique em "Verificar brinco".</p>${animalLotPicker()}${tab === "sessao" ? `<div class="fields">${field("weight", "Peso (kg)", "number")}${field("day", "Data", "date", db.lastWeighingDay || today())}</div>` : ""}${tab === "sessao" ? '<label id="complete-option" hidden><input type="checkbox" id="complete-profile">Completar cadastro</label>' : ""}<div id="profile-fields" ${tab === "sessao" ? "hidden" : ""}>${profileFields()}</div><label><input type="checkbox" id="vaccinated">${tab === "sessao" ? "Vacinado nesta pesagem" : "Adicionar vacinação"}</label><div id="vfields" hidden>${tab === "sessao" ? '<label><input type="checkbox" id="repeat-vaccine">Aplicar na próxima pesagem</label>' : ""}${field("vname", "Nome da vacina")}<div class="fields">${tab === "individual" ? field("vday", "Data que foi realizada", "date", today()) : ""}${field("next", "Próxima dose (opcional)", "date")}</div></div>${tab === "sessao" ? '<label><input type="checkbox" id="bathed">Gado banhado</label>' : ""}<div class="actions"><button class="primary" id="save-entry" type="button">Registrar</button></div></form>${tab === "sessao" ? '<div class="card"><h2>Nesta sessão</h2><div id="sessionrows"></div></div>' : ""}</div>`;
+  if (tab === "individual" && currentRole === "tecnico") $("#merge-animals").onclick = openAnimalMerge;
+  $("#profile-legend").onclick = showProfileLegend;
   $("#entryPriceKg").min = "0";
   $("#entryPriceKg").step = ".01";
   if (tab === "sessao") {
@@ -112,8 +134,8 @@ function render() {
     }
   }
   const controls = [
-    ...$("#entry").querySelectorAll("input,select,button[type=submit]"),
-  ].filter((el) => !["brinco","pick-lot","pick-animal"].includes(el.id));
+    ...$("#entry").querySelectorAll("input,select,#save-entry"),
+  ].filter((el) => !["brinco","tag-color","new-animal","pick-lot","pick-animal"].includes(el.id));
   const lock = () => {
     if ($("#brinco").dataset.verified) {
       if (tab === "sessao") { $("#weight").value = ""; $("#bathed").checked = false; }
@@ -130,40 +152,49 @@ function render() {
       $("#profile-fields").hidden = true;
     }
     controls.forEach((el) => (el.disabled = true));
+    delete $("#brinco").dataset.recordId;
     delete $("#brinco").dataset.verified;
-    $("#known").textContent = "Informe o brinco e clique em Verificar brinco.";
   };
   lock();
+  $("#tag-color").onchange = lock;
+  $("#new-animal").onchange = lock;
   $("#brinco").oninput = () => {
     lock();
     $("#pick-lot").value = "";
     $("#pick-animal").innerHTML = '<option value="">Selecione primeiro um lote</option>';
     $("#pick-animal").disabled = true;
   };
-  $("#pick-lot").onchange = () => {
+  bindLotPicker(member => {
     lock();
-    $("#brinco").value = "";
-    const members = allLots().find(lot=>lot.id === $("#pick-lot").value)?.animals || [];
-    $("#pick-animal").innerHTML = '<option value="">' + (members.length ? 'Selecione um animal' : 'Nenhum animal neste lote') + '</option>' +
-      members.map(animal=>`<option value="${esc(animal.id)}">${esc(animal.id)} · ${statusLabel(animalStatus(animal))}</option>`).join('');
-    $("#pick-animal").disabled = !members.length;
-  };
-  $("#pick-animal").onchange = () => {
-    lock();
-    const id = $("#pick-animal").value;
-    const member = allLots().find(lot=>lot.id === $("#pick-lot").value)?.animals.find(animal=>animal.id === id);
-    $("#brinco").value = member ? member.id : "";
-    if (member) $("#verify").click();
-  };
-  $("#verify").onclick = () => {
+    $("#brinco").value = member ? member.tagNumber || member.id : "";
+    $("#tag-color").value = member?.tagColor || "";
+    $("#new-animal").checked = false;
+    if (member) verifyTag(member);
+  });
+  $("#verify").onclick = () => verifyTag();
+  function verifyTag(selected) {
     const id = $("#brinco").value.trim().toUpperCase();
     if (!id) {
-      toast("Informe o brinco do animal.");
+      toast("⚠️ Informe o brinco do animal.");
       $("#brinco").focus();
       return;
     }
     $("#brinco").value = id;
-    const a = find(id);
+    const color = $("#tag-color").value;
+    const candidates = animalsWithTag(id).filter(a => !a.tagColor || a.tagColor === color);
+    const creating = $("#new-animal").checked;
+    if (!creating && color && !selected && candidates.length > 1)
+      return chooseAnimal(candidates, verifyTag);
+    const a = creating ? undefined : selected || candidates[0];
+    const problem = tagProblem(a);
+    if (problem) {
+      lock();
+      toast(`⚠️ ${problem}`);
+      ($("#tag-color").value ? $("#brinco") : $("#tag-color")).focus();
+      return;
+    }
+    $("#brinco").dataset.recordId = a?.id || "";
+    $("#brinco").dataset.color = $("#tag-color").value;
     $("#brinco").dataset.verified = id;
     for (const k of visibleProfileKeys()) {
       if (["age","breed"].includes(k)) fillProfileSelect(k, a?.[k]);
@@ -173,6 +204,7 @@ function render() {
       $("#complete-option").hidden = !visibleProfileKeys().some(k => !hasInfo(a?.[k]));
       $("#complete-profile").checked = false;
       $("#profile-fields").hidden = true;
+      if (!a && candidates.length) $("#complete-profile").disabled = true;
       if (!a) { $("#complete-profile").checked = true; $("#profile-fields").hidden = false; }
       $("#complete-profile").onchange = () => {
         $("#profile-fields").hidden = !$("#complete-profile").checked;
@@ -181,7 +213,7 @@ function render() {
     }
     refreshProfileLocks();
     if (tab === "individual" && canReturnAnimal(a)) {
-      offerAnimalReturn(a);
+      offerAnimalReturn(a, verifyTag);
       return;
     }
     if (registrationBlocked(a, editUnlocked)) {
@@ -197,5 +229,21 @@ function render() {
     }
   };
   $("#entry").onsubmit = submit;
+  $("#save-entry").onclick = e => { if ($("#entry").reportValidity()) submit(e); };
   sessionRows();
+}
+
+function bindLotPicker(onSelect) {
+  $("#pick-lot").onchange = () => {
+    onSelect(null);
+    const members = allLots().find(lot=>lot.id === $("#pick-lot").value)?.animals || [];
+    $("#pick-animal").innerHTML = '<option value="">' + (members.length ? 'Selecione um animal' : 'Nenhum animal neste lote') + '</option>' +
+      members.map(animal=>`<option value="${esc(animal.id)}">${esc(animal.id)} · ${statusLabel(animalStatus(animal))}</option>`).join('');
+    $("#pick-animal").disabled = !members.length;
+  };
+  $("#pick-animal").onchange = () => {
+    const id = $("#pick-animal").value;
+    const member = allLots().find(lot=>lot.id === $("#pick-lot").value)?.animals.find(animal=>animal.id === id);
+    onSelect(member);
+  };
 }

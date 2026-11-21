@@ -2,10 +2,11 @@
 
 function exitSummary(x) {
   if (!x) return "";
-  return `<div class="hint exit-summary"><div class="exit-details"><b>Saída: ${esc(x.reason)}</b><br>Data: ${date(x.day)}${x.detail ? `<br>Motivo: ${esc(x.detail)}` : ""}${x.recipient ? `<br>Destinatário: ${esc(x.recipient)}` : ""}${x.amount !== undefined ? `<br>Valor: ${Number(x.amount).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}` : ""}</div><div class="exit-tools"><button type="button" class="icon-button" id="edit-exit" aria-label="Editar saída" title="Editar saída"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m9 3-.5 2-2 1-2-.5-2 3.5 1.5 1.5v3L2.5 15l2 3.5 2-.5 2 1 .5 2h4l.5-2 2-1 2 .5 2-3.5-1.5-1.5v-3L20 9l-2-3.5-2 .5-2-1-.5-2Z"/><circle cx="11.3" cy="12" r="3"/></svg></button><button type="button" class="icon-button danger-icon" id="remove-exit" aria-label="Excluir saída" title="Excluir saída"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/></svg></button></div></div>`;
+  return `<div class="hint exit-summary"><div class="exit-details"><b>Saída: ${esc(x.reason)}</b><br>Data: ${date(x.day)}${x.detail ? `<br>Motivo: ${esc(x.detail)}` : ""}${x.recipient ? `<br>Destinatário: ${esc(x.recipient)}` : ""}${x.amount !== undefined ? `<br>Valor: ${Number(x.amount).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}` : ""}</div>${canManageAnimal() ? `<div class="exit-tools"><button type="button" class="icon-button" id="edit-exit" aria-label="Editar saída" title="Editar saída"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m9 3-.5 2-2 1-2-.5-2 3.5 1.5 1.5v3L2.5 15l2 3.5 2-.5 2 1 .5 2h4l.5-2 2-1 2 .5 2-3.5-1.5-1.5v-3L20 9l-2-3.5-2 .5-2-1-.5-2Z"/><circle cx="11.3" cy="12" r="3"/></svg></button><button type="button" class="icon-button danger-icon" id="remove-exit" aria-label="Excluir saída" title="Excluir saída"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/></svg></button></div>` : ""}</div>`;
 }
 
 async function openExit(a, draft = a.exit || {}) {
+  if (!canManageAnimal()) return;
   if (a.exit && !editUnlocked && !(await authorize())) return;
   modal(
     `<form id="exit-form"><h2>Registrar saída</h2><p>Brinco ${esc(a.id)}</p><label for="exit-reason">Tipo de saída</label><select id="exit-reason" required><option value="">Selecione</option>${["Morte", "Venda", "Transferência"].map((r) => `<option ${draft.reason === r ? "selected" : ""}>${r}</option>`).join("")}</select><div id="exit-fields"></div><p id="exit-error" role="alert"></p><div class="actions"><button class="primary" type="submit">Salvar saída</button><button id="exit-back" type="button">Voltar</button></div></form>`,
@@ -48,7 +49,8 @@ async function openExit(a, draft = a.exit || {}) {
       $("#exit-error").textContent = error.message;
       return;
     }
-    if (a.exit && !editUnlocked) {
+    if (!canManageAnimal()) return;
+  if (a.exit && !editUnlocked) {
       const allowed = await authorize();
       if (!allowed) {
         openExit(a, value);
@@ -60,7 +62,7 @@ async function openExit(a, draft = a.exit || {}) {
     try {
       save();
       $("#modal").close();
-      lookup();
+      lookup(a);
       toast("Saída registrada.");
     } catch {
       a.exit = old;
@@ -85,7 +87,7 @@ async function removeExit(a) {
     try {
       save();
       $("#modal").close();
-      lookup();
+      lookup(a);
       toast("Registro de saída excluído.");
     } catch {
       a.exit = previous;

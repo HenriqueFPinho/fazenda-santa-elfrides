@@ -1,6 +1,6 @@
 // Arquivos essenciais da Fazenda Santa Elfrides para acesso sem internet.
 const CACHE_PREFIX = "fazenda-santa-elfrides-offline-";
-const CACHE_NAME = CACHE_PREFIX + "v2";
+const CACHE_NAME = CACHE_PREFIX + "v3";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -21,6 +21,7 @@ const APP_SHELL = [
   "./js/files.js",
   "./js/lots.js",
   "./js/test-data.js",
+  "./js/merge.js",
   "./js/app.js",
   "./js/offline.js",
 ];

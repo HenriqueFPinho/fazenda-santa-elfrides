@@ -17,9 +17,16 @@ function download(name, content, type = "application/octet-stream") {
   }
 }
 
+function validateAdditionalLots(animal) {
+  const ids = animal?.additionalLots;
+  if (ids !== undefined && (!Array.isArray(ids) || ids.some(id => typeof id !== "string" || !id.trim())))
+    throw Error("Os lotes adicionais devem formar uma lista de números de lote entre aspas.");
+}
+
 function validateAnimal(animal) {
   if (!animal || typeof animal !== "object" || typeof animal.id !== "string" || !animal.id.trim()) throw Error("Brinco inválido.");
   if (animal.id !== animal.id.trim().toUpperCase()) throw Error("O brinco deve estar em maiúsculas e sem espaços nas extremidades.");
+  validateAdditionalLots(animal);
   for (const key of PROFILE_FIELDS) {
     if (animal[key] != null && typeof animal[key] !== "string" && !(["age", "entryPriceKg", "lot"].includes(key) && typeof animal[key] === "number")) throw Error("Cadastro inválido.");
   }
